@@ -1,4 +1,4 @@
-import { defineNuxtPlugin } from '#app'
+import { defineNuxtPlugin, useFetch } from '#app'
 
 export default defineNuxtPlugin({
   name: 'images',
