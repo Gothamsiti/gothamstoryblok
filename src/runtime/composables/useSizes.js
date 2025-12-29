@@ -1,4 +1,4 @@
-import { useState } from '#imports'
+import { useState, watch } from '#imports'
 
 export const useSizes = () => {
   const gridCount = 80
