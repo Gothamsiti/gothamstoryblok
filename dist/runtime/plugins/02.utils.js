@@ -1,4 +1,5 @@
-import { defineNuxtPlugin, useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#app'
+import { defineNuxtPlugin } from '#app'
+import { useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#imports'
 
 export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],

@@ -1,4 +1,5 @@
-import { defineNuxtPlugin, useFetch, useRoute, useLanguage } from '#app'
+import { defineNuxtPlugin } from '#app'
+import { useFetch, useRoute, useLanguage } from '#imports'
 
 export default defineNuxtPlugin({
   name: 'labels',
