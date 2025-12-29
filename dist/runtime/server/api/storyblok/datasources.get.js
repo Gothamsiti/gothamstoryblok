@@ -1,5 +1,7 @@
 // https://developers.cloudflare.com/workers/examples/aggregate-requests/
 
+import { defineCachedEventHandler } from '#imports'
+
 const config = useRuntimeConfig()
 export default defineCachedEventHandler(async () => {
   try {

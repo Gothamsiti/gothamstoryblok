@@ -1,5 +1,4 @@
-import { useRuntimeConfig } from '#imports'
-import { createError } from 'h3'
+import { useRuntimeConfig, createError } from '#imports'
 
 const config = useRuntimeConfig()
 const request = async (query) => {

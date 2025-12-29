@@ -1,4 +1,5 @@
 import { clearLinks } from '../../utils/storyblok'
+import { defineEventHandler } from '#imports'
 
 export default defineEventHandler(async () => {
   // Clear cache Nitro

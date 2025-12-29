@@ -1,4 +1,5 @@
 import { links } from '../../utils/storyblok'
+import { defineCachedEventHandler } from '#imports'
 
 export default defineCachedEventHandler(async (event) => {
   const query = getQuery(event)

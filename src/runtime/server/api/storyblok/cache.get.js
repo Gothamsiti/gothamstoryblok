@@ -1,3 +1,5 @@
+import { defineEventHandler } from '#imports'
+
 export default defineEventHandler(async () => {
   const cacheStorage = useStorage('cache:storyblok:_')
   const cachedKeys = await cacheStorage.getKeys()

@@ -1,5 +1,6 @@
 import Cloudflare from 'cloudflare'
 import { clearLinks } from '../../utils/storyblok.js'
+import { defineEventHandler } from '#imports'
 
 const { cloudflare } = useRuntimeConfig()
 

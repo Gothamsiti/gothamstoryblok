@@ -1,10 +1,12 @@
 import { storyblokInit, apiPlugin } from '@storyblok/js'
+import { defineCachedEventHandler } from '#imports'
 
 const config = useRuntimeConfig()
 const { storyblokApi } = storyblokInit({
   accessToken: config.gothamstoryblok.key,
   use: [apiPlugin],
 })
+
 export default defineCachedEventHandler(async (event) => {
   const query = getQuery(event)
   delete query.sbToken
