@@ -1,4 +1,4 @@
-import { useRoute, useState } from '#app'
+import { useRoute, useState } from '#imports'
 
 export const useStoryblokEditor = () => {
   const route = useRoute()

@@ -1,6 +1,5 @@
 import { renderRichText } from '@storyblok/js'
-import { useRequestURL, useRoute, useNuxtApp } from '#imports'
-import { useLanguage, useHead } from '#app'
+import { useRequestURL, useRoute, useNuxtApp, useLanguage, useHead } from '#imports'
 
 const hostChecker = (array, string) => {
   for (var i in array) {

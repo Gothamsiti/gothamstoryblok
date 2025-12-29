@@ -1,4 +1,4 @@
-import { useState } from '#app'
+import { useState } from '#imports'
 
 export const useLanguage = () => {
   const languages = useState('languages', () => undefined)
