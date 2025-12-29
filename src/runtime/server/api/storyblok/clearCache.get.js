@@ -51,9 +51,7 @@ export default defineEventHandler(async (event) => {
     }
   }
   console.log('Cleared cache Nitro - endpoint', endpoint)
-  
   await clearLinks()
-
   if (cloudFlareClient) {
     try {
       await cloudFlareClient.cache.purge({ zone_id: zoneID, purge_everything: true })
