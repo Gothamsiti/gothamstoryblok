@@ -1,3 +1,5 @@
+import { defineNuxtPlugin } from '#app'
+
 export default defineNuxtPlugin({
   async setup() {
     const { data: datasources } = await useFetch('/api/storyblok/datasources')

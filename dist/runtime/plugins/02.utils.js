@@ -1,3 +1,5 @@
+import { defineNuxtPlugin } from '#app'
+
 export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],
   async setup() {
