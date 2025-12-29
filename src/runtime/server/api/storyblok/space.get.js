@@ -1,4 +1,4 @@
-import { space } from './src/server/utils/storyblok'
+import { space } from '../../utils/storyblok'
 
 export default defineCachedEventHandler(async () => {
   return await space()

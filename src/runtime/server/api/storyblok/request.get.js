@@ -1,4 +1,4 @@
-import { request } from './src/server/utils/storyblok'
+import { request } from '../../utils/storyblok'
 
 export default defineCachedEventHandler(async (event) => {
   const query = getQuery(event)

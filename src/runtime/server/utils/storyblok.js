@@ -1,7 +1,7 @@
-import { useRuntimeConfig } from '@nuxt/kit';
+import { useRuntimeConfig } from '#imports'
 import { createError } from 'h3'
 
-const config = useRuntimeConfig();
+const config = useRuntimeConfig()
 const request = async (query) => {
   try {
     const defaultLanguage = config.defaultLanguage

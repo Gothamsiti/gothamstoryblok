@@ -18,10 +18,7 @@ export default defineCachedEventHandler(async () => {
     const response = await Promise.all(responses.map(r => r.json()))
 
     for (var i in response) {
-      response[i].datasource_entries = response[i].datasource_entries.map(
-        (e) => {
-          return { ...e, datasource: datasources[i].slug }
-        })
+      response[i].datasource_entries = response[i].datasource_entries.map(e => ({ ...e, datasource: datasources[i].slug }))
       arr = arr.concat(response[i].datasource_entries)
     }
 
@@ -32,8 +29,8 @@ export default defineCachedEventHandler(async () => {
     throw createError({ statusCode: 500, statusMessage: 'Error building datasources' })
   }
 }, {
-  maxAge: config.maxAge,
-  group: 'gothamstoryblok',
+  maxAge: process.env.DEFAULT_EXPIRE,
+  group: 'storyblok',
   shouldInvalidateCache: (e) => {
     const query = getQuery(e)
     const bypass = query.sbToken != undefined

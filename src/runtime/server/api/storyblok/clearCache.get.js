@@ -1,5 +1,5 @@
 import Cloudflare from 'cloudflare'
-import { clearLinks } from './src/server/utils/storyblok'
+import { clearLinks } from '../../utils/storyblok'
 
 const { cloudflare } = useRuntimeConfig()
 

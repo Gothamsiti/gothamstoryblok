@@ -1,9 +1,10 @@
+import { useRuntimeConfig } from '#imports'
 import { createError } from 'h3'
 
 const config = useRuntimeConfig()
 const request = async (query) => {
   try {
-    const defaultLanguage = config.defaultLanguage || 'it'
+    const defaultLanguage = config.defaultLanguage
     const cv = Date.now()
     const { find_by, returntotal, isEditor } = query
     if (returntotal) delete query.returntotal
@@ -70,9 +71,9 @@ const space = async () => {
   })
 
   const { space } = data
-  const available_languages = [...space.language_codes, config.defaultLanguage || 'it']
+  const available_languages = [...space.language_codes, config.defaultLanguage]
   space.available_languages = available_languages
-  space.default_language = config.defaultLanguage || 'it'
+  space.default_language = config.defaultLanguage
   delete space.language_codes
   return space
 }
@@ -86,8 +87,9 @@ const getAll = async (params) => {
 
   const getStories = async (page = 1, allStories = []) => {
     try {
-      const { stories } = await request(requestParams)
+      const { stories, total } = await request(requestParams)
       allStories.push(...stories)
+      console.log(allStories.length < total)
       if (allStories.length === 100) {
         return getStories(page + 1, allStories)
       }
@@ -117,6 +119,7 @@ const links = async (query) => {
         ...query,
       },
     })
+
     return links
   }
   catch (error) {
@@ -138,6 +141,7 @@ const loadLinksList = async () => {
       }
 
       const links = await $fetch('/api/storyblok/links', { query: { per_page: 1000 } })
+
       for (const i in links) {
         const link = links[i]
         const slugParts = link.slug.split('/')
@@ -162,14 +166,19 @@ const checkFullSlug = async (fullSlug) => {
 
   const slugs = fullSlug.split('/')
   const slug = slugs[slugs.length - 1]
+
   if (!(cachedLinks.slug[slug] || cachedLinks.id[slug] || cachedLinks.uuid[slug])) {
     throw createError({ statusCode: 404, message: 'Not found (fullSlug)' })
   }
 }
 
-const clearLinks = () => {
+const clearLinks = async () => {
   linksList = undefined
   linksListPromise = null
+
+  const cacheLinks = useStorage('cache:storyblok:links')
+  const cachedKeys = await cacheLinks.getKeys()
+  for (var i in cachedKeys) await cacheLinks.removeItem(cachedKeys[i])
 }
 
 export { request, space, getAll, links, clearLinks }

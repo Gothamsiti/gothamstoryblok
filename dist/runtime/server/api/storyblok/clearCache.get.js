@@ -1,7 +1,7 @@
 import Cloudflare from 'cloudflare'
+import { clearLinks } from '../../utils/storyblok.js'
 
 const { cloudflare } = useRuntimeConfig()
-// import { clearLinks } from '~/server/utils/storyblok';
 
 const { zoneID, email, apiKey } = cloudflare
 let cloudFlareClient
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const query = getQuery(event)
   const { fullSlug, language, itemId } = query
-  const cacheStorage = useStorage('cache:gothamstoryblok:_')
+  const cacheStorage = useStorage('cache:storyblok:_')
   const cachedKeys = await cacheStorage.getKeys()
   const endpoint = language && language != config.defaultLanguage ? `${language}/${fullSlug}` : fullSlug
   console.log('Clear cache Nitro - endpoint', endpoint)
