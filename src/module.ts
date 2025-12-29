@@ -1,7 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineNuxtModule, addPlugin, createResolver, addServerHandler } from '@nuxt/kit'
+import { defineNuxtModule, addPlugin, createResolver, addServerHandler, addImports, addImportsDir } from '@nuxt/kit'
 
 // Module options TypeScript interface definition
 export interface ModuleOptions {}
@@ -15,7 +15,6 @@ const addServerRoutes = (resolver : any) => {
     const targetDir = join(currentDir,sourcePath)
     const files = readdirSync(targetDir);
     const cleanedFiles = files.filter(e => e.includes(".js") || e.includes(".ts")).map(e => e.replace(".js","").replace(".ts",""));
-    console.log(cleanedFiles);
     cleanedFiles.forEach(handler => {
       const [route,method] = handler.split(".");
       addServerHandler({ 
@@ -25,7 +24,14 @@ const addServerRoutes = (resolver : any) => {
     })
 }
 const addPlugins = (resolver:any) => {
-    addPlugin(resolver.resolve('./runtime/plugins/test'));
+    addPlugin(resolver.resolve('./runtime/plugins/01.setupLanguages'));
+    addPlugin(resolver.resolve('./runtime/plugins/02.utils'));
+    addPlugin(resolver.resolve('./runtime/plugins/03.labels'));
+    addPlugin(resolver.resolve('./runtime/plugins/04.images'));
+    addPlugin(resolver.resolve('./runtime/plugins/05.datasources'));
+}
+const addComposables = (resolver:any) => {
+  addImportsDir(resolver.resolve('runtime/composables'))
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -41,6 +47,8 @@ export default defineNuxtModule<ModuleOptions>({
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = {..._options};
     const resolver = createResolver(import.meta.url)
+    addPlugins(resolver);
     addServerRoutes(resolver);
+    addComposables(resolver);
   },
 })

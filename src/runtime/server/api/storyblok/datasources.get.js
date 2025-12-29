@@ -6,12 +6,12 @@ export default defineCachedEventHandler(async(event) => {
     try {
         let arr = [];
         const cv = Date.now()
-        const  { datasources } = await fetch('https://api.storyblok.com/v2/cdn/datasources?' + new URLSearchParams({token: config.storyblok.key, per_page: 100, cv }), { headers: { "Content-Type": "application/json" } }).then(response => response.json())
+        const  { datasources } = await fetch('https://api.storyblok.com/v2/cdn/datasources?' + new URLSearchParams({token: config.gothamstoryblok.key, per_page: 100, cv }), { headers: { "Content-Type": "application/json" } }).then(response => response.json())
 
         const promiseArr = [];
         datasources.map(d => {
             promiseArr.push(
-                fetch('https://api.storyblok.com/v2/cdn/datasource_entries?' + new URLSearchParams({token: config.storyblok.key, per_page: 100, cv, datasource: d.slug}, { headers: { "Content-Type": "application/json" }}))
+                fetch('https://api.storyblok.com/v2/cdn/datasource_entries?' + new URLSearchParams({token: config.gothamstoryblok.key, per_page: 100, cv, datasource: d.slug}, { headers: { "Content-Type": "application/json" }}))
             );
         })
 
@@ -32,7 +32,7 @@ export default defineCachedEventHandler(async(event) => {
     }
     
 }, {
-    maxAge: process.env.DEFAULT_EXPIRE,
+    maxAge: config.maxAge,
     group: 'gothamstoryblok',
     shouldInvalidateCache : (e) => {
         const query = getQuery(e);

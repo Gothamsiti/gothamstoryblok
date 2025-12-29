@@ -2,7 +2,6 @@ import { createError } from 'h3'
 const config = useRuntimeConfig();
 const request = async (query) => {
     try {
-        console.log(config);
         const defaultLanguage = config.defaultLanguage || 'it';
         const cv = Date.now();
         const { find_by, returntotal, isEditor } = query;
