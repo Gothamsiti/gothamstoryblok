@@ -2,7 +2,7 @@
   "name": "gothamstoryblok",
   "version": "1.0.3",
   "description": "Gotham.Studio | Storyblok and utils module",
-  "repository": "your-org/my-module",
+  "repository": "Gothamsiti/gothamstoryblok",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@nuxt/kit": "^4.2.2",
+    "@storyblok/js": "^4.4.3",
     "@storyblok/vue": "^9.4.3",
     "cloudflare": "^5.2.0"
   },

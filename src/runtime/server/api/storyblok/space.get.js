@@ -1,11 +1,10 @@
-import { space } from '../../utils/storyblok'
+import { space } from './src/server/utils/storyblok'
 
-const config = useRuntimeConfig()
 export default defineCachedEventHandler(async () => {
   return await space()
 }, {
-  maxAge: config.maxAge,
-  group: 'gothamstoryblok',
+  maxAge: process.env.DEFAULT_EXPIRE,
+  group: 'storyblok',
   shouldInvalidateCache: (e) => {
     const query = getQuery(e)
     const bypass = query.sbToken != undefined
