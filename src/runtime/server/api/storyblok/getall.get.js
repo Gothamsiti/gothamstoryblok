@@ -1,5 +1,5 @@
 import { storyblokInit, apiPlugin } from '@storyblok/js'
-import { defineCachedEventHandler, useRuntimeConfig } from '#imports'
+import { defineCachedEventHandler, useRuntimeConfig, getQuery } from '#imports'
 
 const config = useRuntimeConfig()
 const { storyblokApi } = storyblokInit({

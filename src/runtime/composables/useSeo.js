@@ -1,3 +1,7 @@
+import { renderRichText } from '@storyblok/js'
+import { useRequestURL, useRoute, useNuxtApp } from '#imports'
+import { useLanguage, useHead } from '#app'
+
 const hostChecker = (array, string) => {
   for (var i in array) {
     if (string?.includes(array[i])) return true
@@ -5,7 +9,7 @@ const hostChecker = (array, string) => {
   return false
 }
 export const useSeo = (story) => {
-  const { richText } = richTextModule()
+  const richText = data => renderRichText(data)
   const { host } = useRequestURL()
   const route = useRoute()
   const { defaultLanguage } = useLanguage()

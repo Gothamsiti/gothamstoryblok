@@ -1,5 +1,5 @@
 import { links } from '../../utils/storyblok.js'
-import { defineCachedEventHandler } from '#imports'
+import { defineCachedEventHandler, getQuery, setHeader } from '#imports'
 
 export default defineCachedEventHandler(async (event) => {
   const query = getQuery(event)

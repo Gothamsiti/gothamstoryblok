@@ -1,4 +1,5 @@
 import { useRuntimeConfig, createError } from '#imports'
+import { useStorage } from '#app'
 
 const config = useRuntimeConfig()
 const request = async (query) => {

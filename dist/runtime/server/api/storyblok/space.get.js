@@ -1,5 +1,5 @@
 import { space } from '../../utils/storyblok.js'
-import { defineCachedEventHandler } from '#imports'
+import { defineCachedEventHandler, getQuery } from '#imports'
 
 export default defineCachedEventHandler(async () => {
   return await space()

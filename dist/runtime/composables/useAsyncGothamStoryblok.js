@@ -1,4 +1,6 @@
 import { useStoryblokBridge } from '@storyblok/vue'
+import { useNuxtApp, useState, useAsyncData, createError } from '#imports'
+import { useLanguage } from '#app'
 
 export const useAsyncGothamStoryblok = async (url, options, bridgeOptions, nocomponent = false) => {
   const { $__ } = useNuxtApp()

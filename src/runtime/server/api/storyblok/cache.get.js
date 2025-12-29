@@ -1,4 +1,5 @@
 import { defineEventHandler } from '#imports'
+import { useStorage } from '#app'
 
 export default defineEventHandler(async () => {
   const cacheStorage = useStorage('cache:storyblok:_')

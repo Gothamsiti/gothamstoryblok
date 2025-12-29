@@ -1,3 +1,5 @@
+import { useRoute, useState } from '#app'
+
 export const useStoryblokEditor = () => {
   const route = useRoute()
   const sbEditor = useState('sbEditor', () => {

@@ -1,3 +1,3 @@
 export function useStoryblokEditor(): {
-    sbEditor: any;
+    sbEditor: import("vue").Ref<boolean, boolean>;
 };

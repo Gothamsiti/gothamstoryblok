@@ -19,7 +19,7 @@ export default createConfigForNuxt({
     {
       rules: {
         'no-useless-catch': 'off',
-        'no-undef': 'off',
+        // 'no-undef': 'off',
       },
     },
   )
