@@ -9,6 +9,13 @@ export interface ModuleOptions {
   expire: number
   version: 'draft' | 'published'
   key: string
+  analyticsID: string | undefined
+  analyticsApiSecret: string | undefined
+  cloudflare: {
+    zoneID: string | undefined
+    email: string | undefined
+    apiKey: string | undefined
+  }
 }
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -47,6 +54,13 @@ export default defineNuxtModule<ModuleOptions>({
     expire: 1,
     version: 'draft',
     key: '',
+    analyticsID: undefined,
+    analyticsApiSecret: undefined,
+    cloudflare: {
+      zoneID: undefined,
+      email: undefined,
+      apiKey: undefined,
+    },
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options }

@@ -2,9 +2,8 @@ import Cloudflare from 'cloudflare'
 import { clearLinks } from '../../utils/storyblok.js'
 import { defineEventHandler, useRuntimeConfig, getQuery, useStorage } from '#imports'
 
-const { cloudflare } = useRuntimeConfig()
-
-const { zoneID, email, apiKey } = cloudflare
+const { gothamstoryblok } = useRuntimeConfig()
+const { zoneID, email, apiKey } = gothamstoryblok.cloudflare
 let cloudFlareClient
 if (apiKey && email) {
   cloudFlareClient = new Cloudflare({

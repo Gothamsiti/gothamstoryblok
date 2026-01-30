@@ -37,7 +37,13 @@ const module$1 = defineNuxtModule({
     expire: 1,
     version: "draft",
     key: "",
-    analyticsID: undefined
+    analyticsID: void 0,
+    analyticsApiSecret: void 0,
+    cloudflare: {
+      zoneID: void 0,
+      email: void 0,
+      apiKey: void 0
+    }
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options };
