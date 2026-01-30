@@ -36,7 +36,8 @@ const module$1 = defineNuxtModule({
   defaults: {
     expire: 1,
     version: "draft",
-    key: ""
+    key: "",
+    analyticsID: undefined
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options };
