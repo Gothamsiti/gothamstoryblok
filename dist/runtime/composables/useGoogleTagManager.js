@@ -1,5 +1,5 @@
 import { useRuntimeConfig } from '#imports';
-export const useGoogleTagManager = (analiticsId) => {
+export const useGoogleTagManager = () => {
     if(import.meta.server){
 		const config = useRuntimeConfig();
 		const { analyticsID } = config?.gothamstoryblok;
