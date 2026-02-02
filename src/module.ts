@@ -5,17 +5,31 @@ import { defineNuxtModule, addPlugin, createResolver, addServerHandler, addImpor
 import type { Resolver } from '@nuxt/kit'
 
 // Module options TypeScript interface definition
-export interface ModuleOptions {
+interface IubendaOptions {
+  widgetId: undefined | string
+}
+interface CloudFlareOptions {
+  zoneID: string | undefined
+  email: string | undefined
+  apiKey: string | undefined
+}
+interface AnalyticsOptions {
+  trackingId: string | undefined
+  apiSecret: string | undefined
+}
+interface CacheOptions {
   expire: number
-  version: 'draft' | 'published'
-  key: string
-  analyticsID: string | undefined
-  analyticsApiSecret: string | undefined
-  cloudflare: {
-    zoneID: string | undefined
-    email: string | undefined
-    apiKey: string | undefined
-  }
+}
+interface StoryblokOptions {
+  version: 'draft' | 'published' | undefined
+  key?: string | undefined
+}
+export interface ModuleOptions {
+  cache: CacheOptions
+  storyblok: StoryblokOptions | undefined
+  analytics: AnalyticsOptions | undefined
+  cloudflare: CloudFlareOptions | undefined
+  iubenda: IubendaOptions | undefined
 }
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -51,15 +65,11 @@ export default defineNuxtModule<ModuleOptions>({
     configKey: 'gothamstoryblok',
   },
   defaults: {
-    expire: 1,
-    version: 'draft',
-    key: '',
-    analyticsID: undefined,
-    analyticsApiSecret: undefined,
-    cloudflare: {
-      zoneID: undefined,
-      email: undefined,
-      apiKey: undefined,
+    cache: {
+      expire: 1,
+    },
+    storyblok: {
+      version: 'draft',
     },
   },
   setup(_options, _nuxt) {
