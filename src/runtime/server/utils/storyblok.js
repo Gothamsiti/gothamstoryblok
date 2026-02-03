@@ -109,6 +109,23 @@ const getAll = async (params) => {
     return error
   }
 }
+const getAll = async (params) => { 
+  const requestParams = { ...params, returntotal: true, per_page: 100 };
+  const getStories = async (page = 1, allStories = []) => { 
+    try {
+      const { stories, total } = await request({...requestParams,page}); 
+      allStories.push(...stories) 
+      if (allStories.length < total) { 
+        return getStories(page + 1, allStories)
+      } return allStories 
+    } catch (error) { return error } 
+  } 
+  try { 
+    return await getStories(); 
+  } catch (error) { 
+    return error 
+  } 
+}
 
 const links = async (query) => {
   const cv = Date.now()
