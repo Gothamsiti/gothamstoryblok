@@ -34,15 +34,11 @@ const module$1 = defineNuxtModule({
     configKey: "gothamstoryblok"
   },
   defaults: {
-    expire: 1,
-    version: "draft",
-    key: "",
-    analyticsID: void 0,
-    analyticsApiSecret: void 0,
-    cloudflare: {
-      zoneID: void 0,
-      email: void 0,
-      apiKey: void 0
+    cache: {
+      expire: 1
+    },
+    storyblok: {
+      version: "draft"
     }
   },
   setup(_options, _nuxt) {

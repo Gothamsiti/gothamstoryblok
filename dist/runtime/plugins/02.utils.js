@@ -1,6 +1,9 @@
 import { defineNuxtPlugin } from '#app'
 import { useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#imports'
 
+const config = useRuntimeConfig()
+const { storyblok } = config.gothamstoryblok
+const version = storyblok.version
 export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],
   async setup() {
@@ -26,7 +29,6 @@ export default defineNuxtPlugin({
           return u
         },
         __parseEndpoint: () => {
-          const config = useRuntimeConfig()
           const route = useRoute()
           const { languages, currentLanguage, defaultLanguage, slugList } = useLanguage()
 
@@ -42,9 +44,7 @@ export default defineNuxtPlugin({
             }
             if (fullslug[0] == '' || !fullslug[0]) fullslug = undefined
           }
-
           const endpoint = fullslug || ['homepage']
-          const version = config.public.storyblokVersion
           // ECCEZIONE PER I TRANSLATED SLUGS
           if (!route.query['_storyblok_tk[token]'] && slugList.value?.length > 0) {
             let slug = endpoint.pop()

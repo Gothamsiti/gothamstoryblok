@@ -7,7 +7,7 @@ declare const _default: import("#app").Plugin<{
     } | {
         endpoint: any;
         language: any;
-        version: unknown;
+        version: any;
     };
     __filename: (str: any) => any;
     __formatDate: (d: any) => string;
@@ -21,7 +21,7 @@ declare const _default: import("#app").Plugin<{
     } | {
         endpoint: any;
         language: any;
-        version: unknown;
+        version: any;
     };
     __filename: (str: any) => any;
     __formatDate: (d: any) => string;

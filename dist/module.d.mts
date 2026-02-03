@@ -1,16 +1,30 @@
 import * as _nuxt_schema from '@nuxt/schema';
 
-interface ModuleOptions {
+interface IubendaOptions {
+    widgetId: undefined | string;
+}
+interface CloudFlareOptions {
+    zoneID: string | undefined;
+    email: string | undefined;
+    apiKey: string | undefined;
+}
+interface AnalyticsOptions {
+    trackingId: string | undefined;
+    apiSecret: string | undefined;
+}
+interface CacheOptions {
     expire: number;
-    version: 'draft' | 'published';
-    key: string;
-    analyticsID: string | undefined;
-    analyticsApiSecret: string | undefined;
-    cloudflare: {
-        zoneID: string | undefined;
-        email: string | undefined;
-        apiKey: string | undefined;
-    };
+}
+interface StoryblokOptions {
+    version: 'draft' | 'published' | undefined;
+    key?: string | undefined;
+}
+interface ModuleOptions {
+    cache: CacheOptions;
+    storyblok: StoryblokOptions | undefined;
+    analytics: AnalyticsOptions | undefined;
+    cloudflare: CloudFlareOptions | undefined;
+    iubenda: IubendaOptions | undefined;
 }
 declare const _default: _nuxt_schema.NuxtModule<ModuleOptions, ModuleOptions, false>;
 

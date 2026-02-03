@@ -1,6 +1,9 @@
 import { useRuntimeConfig, createError, useStorage } from '#imports'
 
 const config = useRuntimeConfig()
+const { stoyblok } = config.gothamstoryblok
+const { version, key: token } = stoyblok
+
 const request = async (query) => {
   try {
     const defaultLanguage = config.defaultLanguage
@@ -10,8 +13,8 @@ const request = async (query) => {
     if (isEditor) delete query.isEditor
     const params = {
       cv,
-      version: config.gothamstoryblok.version,
-      token: config.gothamstoryblok.key,
+      version,
+      token,
       find_by,
     }
     if (query.language && query.language != defaultLanguage) {
@@ -34,8 +37,8 @@ const request = async (query) => {
     let { _data: data, headers } = await $fetch.raw('https://api.storyblok.com/v2/cdn/stories', {
       query: {
         cv,
-        version: config.gothamstoryblok.version,
-        token: config.gothamstoryblok.key,
+        version,
+        token,
         ...query,
       },
     })
@@ -65,7 +68,7 @@ const request = async (query) => {
 const space = async () => {
   const data = await $fetch(`https://api.storyblok.com/v2/cdn/spaces/me`, {
     query: {
-      token: config.gothamstoryblok.key,
+      token,
     },
   })
 
@@ -113,8 +116,8 @@ const links = async (query) => {
     const { links } = await $fetch('https://api.storyblok.com/v2/cdn/links', {
       query: {
         cv,
-        version: config.gothamstoryblok.version,
-        token: config.gothamstoryblok.key,
+        version,
+        token,
         ...query,
       },
     })
