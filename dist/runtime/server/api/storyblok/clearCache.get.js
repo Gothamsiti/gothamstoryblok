@@ -44,13 +44,13 @@ export default defineEventHandler(async (event) => {
   }
   console.log('Cleared cache Nitro - endpoint', endpoint)
   await clearLinks()
-  let clouflareCache;
+  let clouflareCache
   if (zoneID && apiKey) {
     try {
       clouflareCache = await $fetch(`https://api.cloudflare.com/client/v4/zones/${zoneID}/purge_cache`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: {
           purge_everything: true,
@@ -61,5 +61,5 @@ export default defineEventHandler(async (event) => {
       console.log('err purge cloudflare cache', error, zoneID)
     }
   }
-  return {internalCache:true,clouflareCache}
+  return { internalCache: true, clouflareCache }
 })
