@@ -1,6 +1,18 @@
 # Changelog
 
 
+## v1.0.31
+
+[compare changes](https://github.com/Gothamsiti/gothamstoryblok/compare/v1.0.30...v1.0.31)
+
+### 🩹 Fixes
+
+- Utils deps ([35eec61](https://github.com/Gothamsiti/gothamstoryblok/commit/35eec61))
+
+### ❤️ Contributors
+
+- Roberto Silvestri <roberto@gotham.studio>
+
 ## v1.0.30
 
 [compare changes](https://github.com/Gothamsiti/gothamstoryblok/compare/v1.0.29...v1.0.30)
