@@ -74,7 +74,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options }
-    _nuxt.options.runtimeConfig.public.gothamstoryblok = { storyblok : { version: _options.storyblok?.version || 'draft' }}
+    _nuxt.options.runtimeConfig.public.gothamstoryblok = { storyblok: { version: _options.storyblok?.version || 'draft' } }
     const resolver = createResolver(import.meta.url)
     addPlugins(resolver)
     addServerRoutes(resolver)
