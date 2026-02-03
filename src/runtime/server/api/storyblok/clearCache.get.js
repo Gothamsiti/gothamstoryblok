@@ -1,16 +1,8 @@
-import Cloudflare from 'cloudflare'
 import { clearLinks } from '../../utils/storyblok'
 import { defineEventHandler, useRuntimeConfig, getQuery, useStorage } from '#imports'
 
 const { gothamstoryblok } = useRuntimeConfig()
-const { zoneID, email, apiKey } = gothamstoryblok.cloudflare
-let cloudFlareClient
-if (apiKey && email) {
-  cloudFlareClient = new Cloudflare({
-    apiEmail: email,
-    apiKey: apiKey,
-  })
-}
+const { zoneID, apiKey } = gothamstoryblok.cloudflare
 const foundSlugInBody = (body, slug) => {
   if (body?.full_slug && body?.full_slug == slug) return true
   if (!body?.full_slug && Array.isArray(body)) {
@@ -52,14 +44,22 @@ export default defineEventHandler(async (event) => {
   }
   console.log('Cleared cache Nitro - endpoint', endpoint)
   await clearLinks()
-
-  if (cloudFlareClient) {
+  let clouflareCache;
+  if (zoneID && apiKey) {
     try {
-      await cloudFlareClient.cache.purge({ zone_id: zoneID, purge_everything: true })
+      clouflareCache = await $fetch(`https://api.cloudflare.com/client/v4/zones/${zoneID}/purge_cache`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: {
+          purge_everything: true,
+        },
+      })
     }
     catch (error) {
-      console.log('err purge cloudflare cache', error)
+      console.log('err purge cloudflare cache', error, zoneID)
     }
   }
-  return true
+  return {internalCache:true,clouflareCache}
 })

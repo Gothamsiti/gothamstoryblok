@@ -36,8 +36,7 @@
   "dependencies": {
     "@nuxt/kit": "^4.2.2",
     "@storyblok/js": "^4.4.3",
-    "@storyblok/vue": "^9.4.3",
-    "cloudflare": "^5.2.0"
+    "@storyblok/vue": "^9.4.3"
   },
   "devDependencies": {
     "@nuxt/devtools": "^3.1.1",

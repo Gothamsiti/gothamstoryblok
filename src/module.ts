@@ -10,7 +10,6 @@ interface IubendaOptions {
 }
 interface CloudFlareOptions {
   zoneID: string | undefined
-  email: string | undefined
   apiKey: string | undefined
 }
 interface AnalyticsOptions {
