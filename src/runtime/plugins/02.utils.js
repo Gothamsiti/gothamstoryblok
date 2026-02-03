@@ -1,12 +1,11 @@
 import { defineNuxtPlugin } from '#app'
-import { useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#imports'
+import { useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#imports';
 
 export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],
   async setup() {
     const config = useRuntimeConfig()
-    const { storyblok } = config.gothamstoryblok
-    const { version } = storyblok
+    const version = config.public?.storyblok?.version || config.gothamstoryblok?.storyblok?.version || 'public';
     return {
       provide: {
         __url: (u) => {
