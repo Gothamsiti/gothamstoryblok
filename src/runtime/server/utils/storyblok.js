@@ -80,35 +80,6 @@ const space = async () => {
   return space
 }
 
-const getAll = async (params) => {
-  const requestParams = {
-    ...params,
-    returntotal: true,
-    per_page: 100,
-  }
-
-  const getStories = async (page = 1, allStories = []) => {
-    try {
-      const { stories, total } = await request(requestParams)
-      allStories.push(...stories)
-      console.log(allStories.length < total)
-      if (allStories.length === 100) {
-        return getStories(page + 1, allStories)
-      }
-      return allStories
-    }
-    catch (error) {
-      return error
-    }
-  }
-
-  try {
-    return await getStories()
-  }
-  catch (error) {
-    return error
-  }
-}
 const getAll = async (params) => { 
   const requestParams = { ...params, returntotal: true, per_page: 100 };
   const getStories = async (page = 1, allStories = []) => { 
