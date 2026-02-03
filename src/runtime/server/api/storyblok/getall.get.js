@@ -2,8 +2,8 @@ import { storyblokInit, apiPlugin } from '@storyblok/js'
 import { defineCachedEventHandler, useRuntimeConfig, getQuery } from '#imports'
 
 const config = useRuntimeConfig()
-const { stoyblok, cache } = config.gothamstoryblok
-const { version, key } = stoyblok
+const { storyblok, cache } = config.gothamstoryblok
+const { version, key } = storyblok
 const { storyblokApi } = storyblokInit({
   accessToken: key,
   use: [apiPlugin],
