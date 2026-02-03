@@ -1,8 +1,8 @@
 import { useRuntimeConfig, createError, useStorage } from '#imports'
 
 const config = useRuntimeConfig()
-const { stoyblok } = config.gothamstoryblok
-const { version, key: token } = stoyblok
+const { storyblok } = config.gothamstoryblok
+const { version, key: token } = storyblok
 
 const request = async (query) => {
   try {
