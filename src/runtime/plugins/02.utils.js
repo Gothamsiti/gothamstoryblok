@@ -3,7 +3,7 @@ import { useLanguage, useRoute, useRuntimeConfig, useStoryblokEditor } from '#im
 
 const config = useRuntimeConfig()
 const { storyblok } = config.gothamstoryblok
-const version = storyblok.version
+const {version} = storyblok
 export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],
   async setup() {
