@@ -80,34 +80,32 @@ const space = async () => {
   return space
 }
 
-const getAll = async (params) => {
-  const requestParams = {
-    ...params,
-    returntotal: true,
-    per_page: 100,
-  }
-
-  const getStories = async (page = 1, allStories = []) => {
+const getAll = async (params, entity, ignoreFlush = false) => {
+    const allStories = [];
+    
+    const getStories = async (page = 1, allStories = []) => {
+        const requestParams = {
+            ...params,
+            returntotal: true,
+            per_page: 100
+        }
+        try {
+            const { stories, total } = await request(requestParams);
+            allStories.push(...stories)
+            if (allStories.length < total) {
+                return getStories(page + 1, allStories)
+            }
+            return allStories
+        } catch (error) {
+            return error
+        }
+    }
+    
     try {
-      const { stories, total } = await request(requestParams)
-      allStories.push(...stories)
-      console.log(allStories.length < total)
-      if (allStories.length === 100) {
-        return getStories(page + 1, allStories)
-      }
-      return allStories
+        return await getStories();
+    } catch (error) {
+        return error
     }
-    catch (error) {
-      return error
-    }
-  }
-
-  try {
-    return await getStories()
-  }
-  catch (error) {
-    return error
-  }
 }
 
 const links = async (query) => {
