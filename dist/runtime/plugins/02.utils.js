@@ -5,7 +5,7 @@ export default defineNuxtPlugin({
   dependsOn: ['labels', 'images'],
   async setup() {
     const config = useRuntimeConfig()
-    const version = config.public?.storyblok?.version || config.gothamstoryblok?.storyblok?.version || 'public'
+    const version = config.public?.gothamstoryblok?.storyblok?.version || config.gothamstoryblok?.storyblok?.version || 'public'
     return {
       provide: {
         __url: (u) => {
