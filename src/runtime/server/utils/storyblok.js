@@ -161,7 +161,7 @@ const checkFullSlug = async (fullSlug) => {
   const slug = slugs[slugs.length - 1]
 
   if (!(cachedLinks.slug[slug] || cachedLinks.id[slug] || cachedLinks.uuid[slug])) {
-    throw createError({ statusCode: 404, message: 'Not found (fullSlug)' })
+    throw createError({ statusCode: 422, message: 'Not found (fullSlug)' })
   }
 }
 
