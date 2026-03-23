@@ -23,8 +23,12 @@ interface StoryblokOptions {
   version: 'draft' | 'published' | undefined
   key?: string | undefined
 }
+interface SitemapOptions {
+  excludeFromSitemap?: string[]
+}
 export interface ModuleOptions {
   cache: CacheOptions
+  sitemap?: SitemapOptions | undefined
   storyblok: StoryblokOptions | undefined
   analytics: AnalyticsOptions | undefined
   cloudflare: CloudFlareOptions | undefined
@@ -67,6 +71,9 @@ export default defineNuxtModule<ModuleOptions>({
     cache: {
       expire: 1,
     },
+    sitemap: {
+      excludeFromSitemap: ['system'],
+    },
     storyblok: {
       version: 'draft',
     },
@@ -77,6 +84,10 @@ export default defineNuxtModule<ModuleOptions>({
     const resolver = createResolver(import.meta.url)
     addPlugins(resolver)
     addServerRoutes(resolver)
+    addServerHandler({
+      route: '/api/sitemap',
+      handler: resolver.resolve('./runtime/server/api/sitemap.js'),
+    })
     addComposables(resolver)
   },
 })
