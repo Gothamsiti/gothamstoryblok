@@ -82,12 +82,13 @@ export default defineNuxtModule<ModuleOptions>({
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options }
     _nuxt.options.runtimeConfig.public.gothamstoryblok = { storyblok: { version: _options.storyblok?.version || 'draft' } }
     const resolver = createResolver(import.meta.url)
-    addPlugins(resolver)
+
     addServerRoutes(resolver)
     addServerHandler({
       route: '/api/sitemap',
       handler: resolver.resolve('./runtime/server/api/sitemap.js'),
     })
     addComposables(resolver)
+    addPlugins(resolver)
   },
 })
