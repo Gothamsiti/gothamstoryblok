@@ -1,8 +1,6 @@
 import { clearLinks } from '../../utils/storyblok'
 import { defineEventHandler, useRuntimeConfig, getQuery, useStorage } from '#imports'
 
-const { gothamstoryblok } = useRuntimeConfig()
-const { zoneID, apiKey } = gothamstoryblok.cloudflare
 const foundSlugInBody = (body, slug) => {
   if (body?.full_slug && body?.full_slug == slug) return true
   if (!body?.full_slug && Array.isArray(body)) {
@@ -17,15 +15,28 @@ const foundSlugInBody = (body, slug) => {
 export default defineEventHandler(async (event) => {
   // Clear cache Nitro
   const config = useRuntimeConfig()
+  const { zoneID, apiKey } = config?.gothamstoryblok?.cloudflare || {}
   const query = getQuery(event)
   const { fullSlug, language, itemId } = query
   const cacheStorage = useStorage('cache:storyblok:_')
-  const cachedKeys = await cacheStorage.getKeys()
+  let cachedKeys = []
   const endpoint = language && language != config.defaultLanguage ? `${language}/${fullSlug}` : fullSlug
   console.log('Clear cache Nitro - endpoint', endpoint)
+  try {
+    cachedKeys = await cacheStorage.getKeys()
+  }
+  catch (error) {
+    console.log('cannot read nitro cache keys in this runtime', error)
+  }
   if (itemId) {
     console.log('ITEM ID', itemId)
-    return await cacheStorage.removeItem(itemId)
+    try {
+      return await cacheStorage.removeItem(itemId)
+    }
+    catch (error) {
+      console.log('cannot clear nitro cache item', error)
+      return { internalCache: false, reason: 'cache-storage-unavailable' }
+    }
   }
   // ho rimosso il push nell'array del promise all perché per qualche ragione non svuotava correttamente in locale.
   // così è più lento ma funziona.
@@ -35,15 +46,30 @@ export default defineEventHandler(async (event) => {
       const toclear = foundSlugInBody(stored?.value?.body, endpoint)
       if (toclear) {
         console.log('clerearing', cachedKeys[i])
-        await cacheStorage.removeItem(cachedKeys[i])
+        try {
+          await cacheStorage.removeItem(cachedKeys[i])
+        }
+        catch (error) {
+          console.log('cannot clear nitro cache key', cachedKeys[i], error)
+        }
       }
     }
     else {
-      await cacheStorage.removeItem(cachedKeys[i])
+      try {
+        await cacheStorage.removeItem(cachedKeys[i])
+      }
+      catch (error) {
+        console.log('cannot clear nitro cache key', cachedKeys[i], error)
+      }
     }
   }
   console.log('Cleared cache Nitro - endpoint', endpoint)
-  await clearLinks()
+  try {
+    await clearLinks()
+  }
+  catch (error) {
+    console.log('cannot clear links cache', error)
+  }
   let clouflareCache
   if (zoneID && apiKey) {
     try {
@@ -60,6 +86,9 @@ export default defineEventHandler(async (event) => {
     catch (error) {
       console.log('err purge cloudflare cache', error, zoneID)
     }
+  }
+  else {
+    console.log('Cloudflare cache purge skipped: missing zoneID/apiKey')
   }
   return { internalCache: true, clouflareCache }
 })
