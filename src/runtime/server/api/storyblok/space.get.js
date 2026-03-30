@@ -1,10 +1,13 @@
 import { space } from '../../utils/storyblok'
-import { defineCachedEventHandler, getQuery } from '#imports'
+import { defineCachedEventHandler, getQuery, useRuntimeConfig } from '#imports'
+
+const config = useRuntimeConfig()
+const { cache } = config.gothamstoryblok
 
 export default defineCachedEventHandler(async () => {
   return await space()
 }, {
-  maxAge: process.env.DEFAULT_EXPIRE,
+  maxAge: cache.expire,
   group: 'storyblok',
   shouldInvalidateCache: (e) => {
     const query = getQuery(e)
