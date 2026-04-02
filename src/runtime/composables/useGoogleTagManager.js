@@ -21,6 +21,7 @@ export const useGoogleTagManager = () => {
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', '${trackingId}');
+                window.gtag = gtag;
               `,
               type: 'text/javascript',
             },
