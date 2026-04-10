@@ -14,7 +14,7 @@ interface CloudFlareOptions {
 }
 interface AnalyticsOptions {
   trackingId: string | undefined
-  apiSecret: string | undefined
+  apiSecret?: string | undefined
 }
 interface CacheOptions {
   expire: number
