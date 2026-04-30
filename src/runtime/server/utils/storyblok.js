@@ -122,13 +122,19 @@ const links = async (query) => {
 
 let linksList = undefined
 let linksListPromise = null
+
+const normalizeFullSlug = (value = '') => {
+  const normalized = String(value).trim().replace(/^\/+|\/+$/g, '')
+  return normalized
+}
+
 const loadLinksList = async () => {
   if (linksList) return linksList
   // Se un'altra richiesta la sta già caricando, aspetta quella
   if (!linksListPromise) {
     linksListPromise = (async () => {
       const result = {
-        slug: {},
+        fullSlug: {},
         uuid: {},
         id: {},
       }
@@ -137,18 +143,18 @@ const loadLinksList = async () => {
 
       for (const i in links) {
         const link = links[i]
-        const slugParts = link.slug.split('/')
-        const slug = slugParts[slugParts.length - 1]
+        const fullSlug = normalizeFullSlug(link?.real_path || link?.slug)
 
-        if (!result.slug[slug]) result.slug[slug] = link
+        if (fullSlug && !result.fullSlug[fullSlug]) result.fullSlug[fullSlug] = link
         if (!result.uuid[link.uuid]) result.uuid[link.uuid] = link
         if (!result.id[link.id]) result.id[link.id] = link
       }
 
       linksList = result
-      linksListPromise = null // reset per richieste future
       return result
-    })()
+    })().finally(() => {
+      linksListPromise = null // reset per richieste future
+    })
   }
 
   return linksListPromise
@@ -156,11 +162,14 @@ const loadLinksList = async () => {
 
 const checkFullSlug = async (fullSlug) => {
   const cachedLinks = await loadLinksList()
+  const identifier = String(fullSlug).trim()
+  const normalizedFullSlug = normalizeFullSlug(fullSlug)
 
-  const slugs = fullSlug.split('/')
-  const slug = slugs[slugs.length - 1]
-
-  if (!(cachedLinks.slug[slug] || cachedLinks.id[slug] || cachedLinks.uuid[slug])) {
+  if (!(cachedLinks.fullSlug[normalizedFullSlug] || cachedLinks.id[identifier] || cachedLinks.uuid[identifier])) {
+    console.warn('[gothamstoryblok] fullSlug filtered by links', {
+      fullSlug: normalizedFullSlug,
+      requested: fullSlug,
+    })
     throw createError({ statusCode: 422, message: 'Not found (fullSlug)' })
   }
 }
