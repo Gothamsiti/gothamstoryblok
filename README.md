@@ -47,6 +47,11 @@ export default defineNuxtConfig({
     cache: {
       expire: 1, // Cache di 1 ora
     },
+    // Configurazione Cache cloudflare
+    cloudflare: {
+      zoneID: 'YOUR_CLOUDFLARE_ZONE_ID',
+      apiKey: 'YOUR_CLOUDFLARE_API_KEY'
+    },
     // Configurazione sitemap (opzionale)
     sitemap: {
       excludeFromSitemap: ['system'], // Slug da escludere
@@ -55,18 +60,9 @@ export default defineNuxtConfig({
 })
 ```
 
-### Opzioni di Configurazione
-
-| Opzione | Tipo | Default | Descrizione |
-|---------|------|---------|-------------|
-| `storyblok.key` | `string` | - | Token API di Storyblok |
-| `storyblok.version` | `'draft' \| 'published'` | `'draft'` | Versione dei contenuti da recuperare |
-| `cache.expire` | `number` | `1` | Durata del cache in ore |
-| `sitemap.excludeFromSitemap` | `string[]` | `['system']` | Slug da escludere dalla sitemap |
-
 ### Dipendenze
 
-Questo modulo dipende da **gothamutils**, assicurati che sia configurato correttamente per il multi-lingua:
+Questo modulo dipende da [Gothamutils](https://github.com/Gothamsiti/GothamUtils), assicurati che sia configurato correttamente per il multi-lingua e le altre options gestite dal modulo:
 
 ```typescript
 export default defineNuxtConfig({
