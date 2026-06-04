@@ -75,9 +75,9 @@ export default defineNuxtModule<ModuleOptions>({
       defaults: {
         multiLang: false,
         analytics: undefined,
-        iubenda: undefined
-      }
-    }
+        iubenda: undefined,
+      },
+    },
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options }

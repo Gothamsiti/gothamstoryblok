@@ -36,7 +36,7 @@ export default defineNuxtPlugin({
             }
           }
           return { endpoint: endpoint.join('/'), language, version }
-        }
+        },
       },
     }
   },
