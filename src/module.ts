@@ -5,16 +5,9 @@ import { defineNuxtModule, addPlugin, createResolver, addServerHandler, addImpor
 import type { Resolver } from '@nuxt/kit'
 
 // Module options TypeScript interface definition
-interface IubendaOptions {
-  widgetId: undefined | string
-}
 interface CloudFlareOptions {
   zoneID: string | undefined
   apiKey: string | undefined
-}
-interface AnalyticsOptions {
-  trackingId: string | undefined
-  apiSecret?: string | undefined
 }
 interface CacheOptions {
   expire: number
@@ -30,9 +23,7 @@ export interface ModuleOptions {
   cache: CacheOptions
   sitemap?: SitemapOptions | undefined
   storyblok: StoryblokOptions | undefined
-  analytics: AnalyticsOptions | undefined
   cloudflare: CloudFlareOptions | undefined
-  iubenda: IubendaOptions | undefined
 }
 const currentDir = dirname(fileURLToPath(import.meta.url))
 
@@ -52,11 +43,10 @@ const addServerRoutes = (resolver: Resolver) => {
   })
 }
 const addPlugins = (resolver: Resolver) => {
-  addPlugin(resolver.resolve('./runtime/plugins/01.setupLanguages'))
-  addPlugin(resolver.resolve('./runtime/plugins/02.utils'))
-  addPlugin(resolver.resolve('./runtime/plugins/03.labels'))
-  addPlugin(resolver.resolve('./runtime/plugins/04.images'))
-  addPlugin(resolver.resolve('./runtime/plugins/05.datasources'))
+  addPlugin(resolver.resolve('./runtime/plugins/utils'))
+  addPlugin(resolver.resolve('./runtime/plugins/labels'))
+  addPlugin(resolver.resolve('./runtime/plugins/images'))
+  addPlugin(resolver.resolve('./runtime/plugins/datasources'))
 }
 const addComposables = (resolver: Resolver) => {
   addImportsDir(resolver.resolve('runtime/composables'))
@@ -77,6 +67,17 @@ export default defineNuxtModule<ModuleOptions>({
     storyblok: {
       version: 'draft',
     },
+  },
+  moduleDependencies: {
+    // https://github.com/cernymatej/nuxt/blob/main/docs/3.guide/4.modules/2.module-anatomy.md
+    // https://github.com/cernymatej/nuxt/blob/04347e0ca74e85c27ceb86d81a74eef80b41725a/docs/3.guide/4.modules/4.module-dependencies.md
+    gothamutils: {
+      defaults: {
+        multiLang: false,
+        analytics: undefined,
+        iubenda: undefined
+      }
+    }
   },
   setup(_options, _nuxt) {
     _nuxt.options.runtimeConfig.gothamstoryblok = { ..._options }
