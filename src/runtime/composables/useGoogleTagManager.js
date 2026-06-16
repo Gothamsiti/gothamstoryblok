@@ -14,6 +14,7 @@ export const useGoogleTagManager = () => {
               type: 'text/javascript',
               async: true,
               body: true,
+              'data-cookieconsent': 'statistics',
             },
             {
               innerHTML: `
@@ -24,6 +25,7 @@ export const useGoogleTagManager = () => {
                 window.gtag = gtag;
               `,
               type: 'text/javascript',
+              'data-cookieconsent': 'statistics',
             },
 
           ],
