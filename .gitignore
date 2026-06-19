@@ -13,9 +13,6 @@ node_modules
 **/.yarn/cache
 **/.yarn/*state*
 
-# Dist
-dist
-
 # Nuxt
 .nuxt
 .output

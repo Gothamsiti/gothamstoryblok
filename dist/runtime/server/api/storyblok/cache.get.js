@@ -1,0 +1,15 @@
+import { defineEventHandler, useStorage } from '#imports'
+
+export default defineEventHandler(async () => {
+  const cacheStorage = useStorage('cache:storyblok:_')
+  const cachedKeys = await cacheStorage.getKeys()
+  const promises = cachedKeys.map(async (c) => {
+    const item = await cacheStorage.getItem(c)
+    return {
+      name: c,
+      ...item,
+    }
+  })
+  const items = await Promise.all(promises)
+  return items
+})

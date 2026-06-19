@@ -1,4 +1,4 @@
-import { request } from '../../utils/storyblok'
+import { request } from '../../utils/storyblok.js'
 import { defineCachedEventHandler, getQuery, setHeader, useRuntimeConfig } from '#imports'
 
 const config = useRuntimeConfig()
