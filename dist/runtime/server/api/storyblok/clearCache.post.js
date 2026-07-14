@@ -1,13 +1,25 @@
 import { clearLinks } from '../../utils/storyblok.js'
 import { defineEventHandler, useStorage, readBody, createError } from '#imports'
+import { purgeCloudflareCache } from '../../utils/cloudflare.js'
 
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event)
+    const body = (await readBody(event)) || {}
     const { full_slug } = body
     const store = useStorage('cache:storyblok:_')
     const cachedKeys = await store.getKeys()
     await clearLinks()
+    
+
+    if (!body || Object.keys(body).length === 0) {
+      let promiseArr = []
+      for (var i in cachedKeys) promiseArr.push(store.removeItem(cachedKeys[i]))
+      await Promise.all(promiseArr)
+
+      const cloudflareResponse = await purgeCloudflareCache()
+
+      return { message: 'full cache cleared', cloudflareResponse }
+    }
 
     if (full_slug) {
       const foundKeys = []
@@ -21,14 +33,9 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      return { message: 'cache cleared by full_slug', found: foundKeys.length > 0, keys: foundKeys }
-    }
-    else {
-      let promiseArr = []
-      for (var i in cachedKeys) promiseArr.push(store.removeItem(cachedKeys[i]))
-      await Promise.all(promiseArr)
+      const cloudflareResponse = await purgeCloudflareCache();
 
-      return { message: 'full cache cleared' }
+      return { message: 'cache cleared by full_slug', found: foundKeys.length > 0, keys: foundKeys, cloudflareResponse }
     }
   }
   catch (error) {
