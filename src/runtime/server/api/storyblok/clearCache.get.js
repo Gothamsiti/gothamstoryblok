@@ -1,4 +1,5 @@
 import { clearLinks } from '../../utils/storyblok'
+import { purgeCloudflareCache } from '../../utils/cloudflare'
 import { defineEventHandler, useRuntimeConfig, getQuery, useStorage } from '#imports'
 
 const foundSlugInBody = (body, slug) => {
@@ -70,25 +71,8 @@ export default defineEventHandler(async (event) => {
   catch (error) {
     console.log('cannot clear links cache', error)
   }
-  let clouflareCache
-  if (zoneID && apiKey) {
-    try {
-      clouflareCache = await $fetch(`https://api.cloudflare.com/client/v4/zones/${zoneID}/purge_cache`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: {
-          purge_everything: true,
-        },
-      })
-    }
-    catch (error) {
-      console.log('err purge cloudflare cache', error, zoneID)
-    }
-  }
-  else {
-    console.log('Cloudflare cache purge skipped: missing zoneID/apiKey')
-  }
-  return { internalCache: true, clouflareCache }
+
+  const cloudflareResponse = await purgeCloudflareCache();
+  
+  return { internalCache: true, cloudflareResponse }
 })
