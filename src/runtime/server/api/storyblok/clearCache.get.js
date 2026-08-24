@@ -16,7 +16,6 @@ const foundSlugInBody = (body, slug) => {
 export default defineEventHandler(async (event) => {
   // Clear cache Nitro
   const config = useRuntimeConfig()
-  const { zoneID, apiKey } = config?.gothamstoryblok?.cloudflare || {}
   const query = getQuery(event)
   const { fullSlug, language, itemId } = query
   const cacheStorage = useStorage('cache:storyblok:_')
@@ -72,7 +71,7 @@ export default defineEventHandler(async (event) => {
     console.log('cannot clear links cache', error)
   }
 
-  const cloudflareResponse = await purgeCloudflareCache();
-  
+  const cloudflareResponse = await purgeCloudflareCache()
+
   return { internalCache: true, cloudflareResponse }
 })

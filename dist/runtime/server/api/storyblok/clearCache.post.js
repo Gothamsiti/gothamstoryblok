@@ -9,7 +9,6 @@ export default defineEventHandler(async (event) => {
     const store = useStorage('cache:storyblok:_')
     const cachedKeys = await store.getKeys()
     await clearLinks()
-    
 
     if (!body || Object.keys(body).length === 0) {
       let promiseArr = []
@@ -33,7 +32,7 @@ export default defineEventHandler(async (event) => {
         }
       }
 
-      const cloudflareResponse = await purgeCloudflareCache();
+      const cloudflareResponse = await purgeCloudflareCache()
 
       return { message: 'cache cleared by full_slug', found: foundKeys.length > 0, keys: foundKeys, cloudflareResponse }
     }
