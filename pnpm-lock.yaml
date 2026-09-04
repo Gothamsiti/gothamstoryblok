@@ -24,7 +24,7 @@ importers:
         version: 11.3.1(@floating-ui/dom@1.8.0)(vue@3.5.42(typescript@6.0.3))
       gothamutils:
         specifier: github:Gothamsiti/gothamutils
-        version: https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/634bbdee4e9d3ad9cd5eff0b005e44f244347eab(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0)))
+        version: https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/1eb88c147bec38eba4ec0f18ef6df663f66f21a3(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0)))
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -2957,9 +2957,9 @@ packages:
     resolution: {integrity: sha512-c8B/VNLmxRcmqqenRA9t+9IyOjf9+V6lTxPaUJLqOCONdQkWZ0ETYgX0qbtJqPsgCNusT9MZ5Jeidw8Eb9tn2g==}
     engines: {node: '>=20'}
 
-  gothamutils@https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/634bbdee4e9d3ad9cd5eff0b005e44f244347eab:
-    resolution: {gitHosted: true, integrity: sha512-1pvaq0gPxcujnqQtY8WUPdW1No/T5/pHbnhrkRM6mKBtRadQUN3mp9A0wL8R07W/yqwGag2tpshCcgO8vrS5+w==, tarball: https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/634bbdee4e9d3ad9cd5eff0b005e44f244347eab}
-    version: 1.0.65
+  gothamutils@https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/1eb88c147bec38eba4ec0f18ef6df663f66f21a3:
+    resolution: {gitHosted: true, integrity: sha512-gdmmsD38EhYanEEpraOrmwD30vfV0MBZS+X5omGlriG0UBBGjELOOUGn0IhmPUOKtibKNMnP8gVcyvTpP5eF9Q==, tarball: https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/1eb88c147bec38eba4ec0f18ef6df663f66f21a3}
+    version: 1.0.66
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
@@ -8218,7 +8218,7 @@ snapshots:
       slash: 5.1.0
       unicorn-magic: 0.4.0
 
-  gothamutils@https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/634bbdee4e9d3ad9cd5eff0b005e44f244347eab(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))):
+  gothamutils@https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/1eb88c147bec38eba4ec0f18ef6df663f66f21a3(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))):
     dependencies:
       '@nuxt/kit': 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0)))
     transitivePeerDependencies:
