@@ -37,7 +37,7 @@
   "dependencies": {
     "@nuxt/kit": "^4.5.2",
     "@storyblok/js": "^6.3.2",
-    "@storyblok/vue": "^11.3.1",
+    "@storyblok/vue": "^11.3.2",
     "gothamutils": "github:Gothamsiti/gothamutils",
     "typescript": "6.0.3"
   },
@@ -49,7 +49,7 @@
     "@nuxt/test-utils": "^4.3.2",
     "@types/node": "latest",
     "changelogen": "^0.6.2",
-    "eslint": "^10.10.0",
+    "eslint": "^10.11.0",
     "nuxt": "^4.5.2",
     "vitest": "^4.1.11",
     "vue-tsc": "^3.3.11"
