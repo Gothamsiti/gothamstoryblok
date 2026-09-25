@@ -1,7 +1,7 @@
 {
   "name": "gothamstoryblok",
   "configKey": "gothamstoryblok",
-  "version": "1.0.74",
+  "version": "1.0.75",
   "builder": {
     "@nuxt/module-builder": "1.0.3",
     "unbuild": "unknown"
