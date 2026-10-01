@@ -143,9 +143,11 @@ const loadLinksList = async () => {
 
       for (const i in links) {
         const link = links[i]
-        const fullSlug = normalizeFullSlug(link?.real_path || link?.slug)
-
-        if (fullSlug && !result.fullSlug[fullSlug]) result.fullSlug[fullSlug] = link
+        // indicizza sia slug (usato da cdn/stories) che real_path (può differire se impostato su Storyblok)
+        for (const value of [link?.slug, link?.real_path]) {
+          const fullSlug = normalizeFullSlug(value)
+          if (fullSlug && !result.fullSlug[fullSlug]) result.fullSlug[fullSlug] = link
+        }
         if (!result.uuid[link.uuid]) result.uuid[link.uuid] = link
         if (!result.id[link.id]) result.id[link.id] = link
       }
