@@ -23,7 +23,7 @@ export const purgeCloudflareCache = async (purgeEverything = true, files?: strin
           Authorization: `Bearer ${apiKey}`,
         },
         body,
-      }
+      },
     )
   }
   catch (error) {
