@@ -20,7 +20,7 @@ export default defineNuxtPlugin({
       starts_with: 'system/labels',
       language,
     }
-    const { data: stories } = await useFetch('/api/storyblok/request', {
+    const { data: stories } = await useFetch('/api/storyblok/all', {
       query,
     })
     if (stories?.value?.length) {
