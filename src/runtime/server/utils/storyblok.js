@@ -84,9 +84,10 @@ const getAll = async (params) => {
   const requestParams = { ...params, returntotal: true, per_page: 100 }
   const getStories = async (page = 1, allStories = []) => {
     try {
-      const { stories, total } = await request({ ...requestParams, page })
+      const { stories, total, perPage } = await request({ ...requestParams, page })
       allStories.push(...stories)
-      if (allStories.length < total) return getStories(page + 1, allStories)
+      // confronto sulle pagine: request() filtra le storie disabilitate, quindi allStories.length può non raggiungere mai total
+      if (page * perPage < total) return getStories(page + 1, allStories)
       return allStories
     }
     catch (error) {
