@@ -5,6 +5,7 @@ overrides:
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
+  gothamutils@https://codeload.github.com/Gothamsiti/gothamutils/tar.gz/220b3ae450bca6ca7cf1c5e383510b2509517309: true
   unrs-resolver: true
 onlyBuiltDependencies:
   - '@parcel/watcher'
