@@ -2,45 +2,23 @@ import { useRuntimeConfig, createError, useStorage } from '#imports'
 
 const config = useRuntimeConfig()
 const { storyblok } = config.gothamstoryblok
-const { version, key: token } = storyblok
+const { key: apiKey, draftKey: draftApiKey } = storyblok
 
 const request = async (query) => {
   try {
-    const defaultLanguage = config.defaultLanguage
-    const cv = Date.now()
-    const { find_by, returntotal, isEditor } = query
+    const { returntotal } = query
     if (returntotal) delete query.returntotal
-    if (isEditor) delete query.isEditor
-    const params = {
-      cv,
-      version,
-      token,
-      find_by,
-    }
-    if (query.language && query.language != defaultLanguage) {
-      params.language = query.language
-    }
-    if (query.resolve_relations) {
-      params.resolve_relations = query.resolve_relations
-    }
+    const { params, isEditor } = extendsParamsWithTokenAndVersion(query)
     if (query.fullSlug) {
-      await checkFullSlug(query.fullSlug)
-
+      if (!isEditor) await checkFullSlug(query.fullSlug)
+      if (params.fullSlug) delete params.fullSlug
       const data = await $fetch(`https://api.storyblok.com/v2/cdn/stories/${query.fullSlug}`, { method: 'GET', query: params })
-
       const { story, rels } = data
-
       if (params.resolve_relations) return { story, rels }
       return story
     }
-
     let { _data: data, headers } = await $fetch.raw('https://api.storyblok.com/v2/cdn/stories', {
-      query: {
-        cv,
-        version,
-        token,
-        ...query,
-      },
+      query: params,
     })
     const perPage = Number.parseInt(headers.get('per-page'))
     const total = Number.parseInt(headers.get('total'))
@@ -68,7 +46,7 @@ const request = async (query) => {
 const space = async () => {
   const data = await $fetch(`https://api.storyblok.com/v2/cdn/spaces/me`, {
     query: {
-      token,
+      token: apiKey,
     },
   })
 
@@ -101,17 +79,29 @@ const getAll = async (params) => {
     return error
   }
 }
+const extendsParamsWithTokenAndVersion = (query) => {
+  const isEditor = query.isEditor || false
+  const version = isEditor ? 'draft' : storyblok.version
+  const token = version == 'draft' ? draftApiKey || apiKey : apiKey
+  if (isEditor) delete query.isEditor
+  const defaultLanguage = config.defaultLanguage
+  if (query.language == defaultLanguage) delete query.language
+  return {
+    params: {
+      cv: Date.now(),
+      version,
+      token,
+      ...query,
+    },
+    isEditor,
+  }
+}
 
 const links = async (query) => {
-  const cv = Date.now()
+  const { params } = extendsParamsWithTokenAndVersion(query);
   try {
     const { links } = await $fetch('https://api.storyblok.com/v2/cdn/links', {
-      query: {
-        cv,
-        version,
-        token,
-        ...query,
-      },
+      query: params,
     })
 
     return links

@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     storyblok: {
       version: process.env.STORYBLOK_VERSION as 'draft' | 'published',
       key: process.env.STORYBLOK_API_KEY,
+      draftKey: process.env.STORYBLOK_DRAFT_API_KEY,
     },
     analytics: {
       trackingId: process.env.ANALYTICS_ID,

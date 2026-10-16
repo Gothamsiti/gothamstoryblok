@@ -287,7 +287,7 @@ Recupera storie da Storyblok con caching.
 - `sort_by` - Campo per ordinamento
 - `per_page` - Numero risultati per pagina
 - `page` - Numero pagina
-- `sbToken` - Token di Storyblok (bypass cache)
+- `isEditor` - Booleano (true bypass cache)
 
 **Esempio:**
 
@@ -443,14 +443,14 @@ Il modulo implementa un sistema di cache lato server configurabile:
 
 - **Cache Duration:** Configurabile tramite `cache.expire` (in ore)
 - **Cache Group:** Tutti gli endpoint usano il gruppo `'storyblok'` per gestione centralizzata
-- **Cache Bypass:** Passa `sbToken` come query parameter per forzare il bypass della cache (utile per l'editor)
+- **Cache Bypass:** Passa `isEditor` come query parameter per forzare il bypass della cache (utile per l'editor)
 
 ```typescript
 // Forza bypass del cache
 const story = await $fetch('/api/storyblok/request', {
   query: {
     fullSlug: 'home',
-    sbToken: 'editor-token', // Bypassa cache
+    isEdito: true, // Bypassa cache
   },
 })
 ```
@@ -531,7 +531,7 @@ gothamstoryblok/
 
 ### Cache non aggiornato
 
-- Usa il query parameter `sbToken` per byppassare la cache
+- Usa il query parameter `isEditor` per byppassare la cache
 - O accedi a `/api/storyblok/clearCache` per svuotare manualmente
 
 ## License

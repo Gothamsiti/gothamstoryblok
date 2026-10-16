@@ -15,6 +15,7 @@ interface CacheOptions {
 interface StoryblokOptions {
   version: 'draft' | 'published' | undefined
   key?: string | undefined
+  draftKey?: string | undefined
 }
 interface SitemapOptions {
   excludeFromSitemap?: string[]

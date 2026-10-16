@@ -11,9 +11,8 @@ export default defineCachedEventHandler(async (event) => {
 }, {
   maxAge: cache.expire,
   group: 'storyblok',
-  shouldInvalidateCache: (e) => {
+  shouldBypassCache: (e) => {
     const query = getQuery(e)
-    return query.sbToken != undefined || query.isEditor === 'true' || query.isEditor === true
+    return query.isEditor === 'true' || query.isEditor === true
   },
-
 })

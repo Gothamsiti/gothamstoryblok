@@ -3,14 +3,14 @@ import { useRuntimeConfig, defineCachedEventHandler } from '#imports'
 export default defineCachedEventHandler(async () => {
   const config = useRuntimeConfig()
   const { storyblok, sitemap } = config.gothamstoryblok
-  const { version, key: token } = storyblok
+  const { version, key: token, draftKey: draftToken } = storyblok
   const { excludeFromSitemap } = sitemap || {}
 
   const getStories = async (page) => {
     try {
       const res = await $fetch('https://api.storyblok.com/v2/cdn/stories', {
         params: {
-          token: token,
+          token: version == 'draft' ? draftToken || token : token,
           version: version,
           per_page: 100,
           page: page || 1,
