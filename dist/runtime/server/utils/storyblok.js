@@ -80,7 +80,7 @@ const getAll = async (params) => {
   }
 }
 const extendsParamsWithTokenAndVersion = (query) => {
-  const isEditor = query.isEditor || false
+  const isEditor = (query.isEditor == 'true' || query.isEditor === true) || false
   const version = isEditor ? 'draft' : storyblok.version
   const token = version == 'draft' ? draftApiKey || apiKey : apiKey
   if (isEditor || isEditor === false) delete query.isEditor
