@@ -83,7 +83,7 @@ const extendsParamsWithTokenAndVersion = (query) => {
   const isEditor = query.isEditor || false
   const version = isEditor ? 'draft' : storyblok.version
   const token = version == 'draft' ? draftApiKey || apiKey : apiKey
-  if (isEditor) delete query.isEditor
+  if (isEditor || isEditor === false) delete query.isEditor
   const defaultLanguage = config.defaultLanguage
   if (query.language == defaultLanguage) delete query.language
   return {
