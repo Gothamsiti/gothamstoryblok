@@ -28,7 +28,8 @@ export const useAsyncGothamStoryblok = async (url, options, bridgeOptions, nocom
       const { currentLanguage, defaultLanguage } = useLanguage()
       if (!params.language && currentLanguage.value != defaultLanguage) params.language = currentLanguage.value
 
-      if (params.isEditor) {
+      if (params.isEditor && params.isMainStory) {
+        delete params.isMainStory
         await $fetch('/api/storyblok/clearCache', { query: { fullSlug: params.fullSlug } }).catch(() => {})
       }
 
