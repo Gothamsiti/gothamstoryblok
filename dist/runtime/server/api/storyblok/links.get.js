@@ -1,0 +1,20 @@
+import { links } from '../../utils/storyblok.js'
+import { defineCachedEventHandler, getQuery, setHeader, useRuntimeConfig } from '#imports'
+
+const config = useRuntimeConfig()
+const { cache } = config.gothamstoryblok
+
+export default defineCachedEventHandler(async (event) => {
+  const query = getQuery(event)
+  setHeader(event, 'x-origin-url', event.node.req.url)
+  return await links(query)
+}, {
+  maxAge: cache.expire,
+  group: 'storyblok',
+  name: 'links',
+  shouldBypassCache: (e) => {
+    const query = getQuery(e)
+    const bypass = query.isEditor == 'true' || query.isEditor === true
+    return bypass
+  },
+})
