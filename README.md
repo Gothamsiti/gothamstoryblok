@@ -446,7 +446,18 @@ const retry = async () => {
 Il modulo implementa un sistema di cache lato server configurabile:
 
 - **Cache Duration:** configurabile tramite `cache.expire`, **in secondi** (è il `maxAge` di `defineCachedEventHandler`). Il default è `1`, cioè praticamente nessuna cache: in produzione impostalo esplicitamente, ad esempio `31536000` (1 anno) e affidati a `clearCache` per l'invalidazione.
-- **Cache Group:** tutti gli endpoint usano il gruppo `'storyblok'`, quindi le voci finiscono nello storage `cache` di Nitro con chiavi `storyblok:_:*`.
+- **Cache Group:** tutti gli endpoint usano il gruppo `'storyblok'`, quindi le voci finiscono nello storage `cache` di Nitro con chiavi `storyblok:_:*` (`storyblok:links:*` per i link).
+- **Chiavi leggibili:** ogni voce ha una chiave che descrive la chiamata, così la si ritrova cercando lo slug (in `/api/storyblok/cache`, nella pagina cache del progetto o in *Workers KV → KV Pairs*). Formato: `<tipo>__<lingua>__<slug>__<parametro>_<valore>__…__<hash>`.
+
+  | Chiamata | Chiave |
+  |---|---|
+  | `request?fullSlug=casi-d-uso/banco-prova` | `story__it__casi_d_uso_banco_prova__<hash>` |
+  | `request?starts_with=casi-d-uso&is_startpage=0` | `stories__it__casi_d_uso__is_startpage_0__<hash>` |
+  | `all?excluding_slugs=system/*` | `all__it__all__excluding_slugs_system__<hash>` |
+  | `links?per_page=1000` | `links__it__per_page_1000__<hash>` |
+  | `space`, `datasources` | `space`, `datasources` |
+
+  Nitro accetta nelle chiavi solo lettere, numeri e `_`, quindi `/`, `-` e gli altri simboli diventano `_`: per cercare `casi-d-uso` cerca `casi_d_uso`. L'hash finale distingue le chiamate che dopo la conversione risulterebbero uguali. `isEditor=false` non entra nella chiave; `space` e `datasources` ignorano la query, quindi parametri aggiunti all'URL non creano voci nuove.
 - **Cache Bypass:** passa `isEditor=true` come query parameter per forzare il bypass della cache (utile per l'editor).
 
 ```typescript

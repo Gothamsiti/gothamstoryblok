@@ -1,5 +1,6 @@
 // https://developers.cloudflare.com/workers/examples/aggregate-requests/
 
+import { storyblokCacheKey } from '../../utils/cacheKey'
 import { defineCachedEventHandler, useRuntimeConfig, createError, getQuery } from '#imports'
 
 const config = useRuntimeConfig()
@@ -35,6 +36,7 @@ export default defineCachedEventHandler(async () => {
 }, {
   maxAge: cache.expire,
   group: 'storyblok',
+  getKey: storyblokCacheKey('datasources'),
   shouldBypassCache: (e) => {
     const query = getQuery(e)
     const bypass = query.isEditor == 'true' || query.isEditor === true

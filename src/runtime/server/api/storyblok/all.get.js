@@ -1,4 +1,5 @@
 import { getAll } from '../../utils/storyblok'
+import { storyblokCacheKey } from '../../utils/cacheKey'
 import { defineCachedEventHandler, getQuery, setHeader, useRuntimeConfig } from '#imports'
 
 const config = useRuntimeConfig()
@@ -11,6 +12,7 @@ export default defineCachedEventHandler(async (event) => {
 }, {
   maxAge: cache.expire,
   group: 'storyblok',
+  getKey: storyblokCacheKey('all'),
   shouldBypassCache: (e) => {
     const query = getQuery(e)
     const bypass = query.isEditor == 'true' || query.isEditor === true
