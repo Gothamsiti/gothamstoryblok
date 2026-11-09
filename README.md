@@ -345,7 +345,11 @@ const cacheInfo = await $fetch('/api/storyblok/cache')
 
 ### GET `/api/storyblok/clearCache`
 
-Svuota la cache (solo in modalità draft).
+Svuota la cache Nitro e lancia un purge completo della cache Cloudflare (se `cloudflare.zoneID` e `cloudflare.apiKey` sono configurati). L'endpoint non richiede autenticazione: vedi [Svuotamento della cache](#svuotamento-della-cache).
+
+- senza parametri: svuota tutte le voci del gruppo `storyblok`
+- `?fullSlug=...` (ed eventualmente `&language=...`): svuota solo le voci che contengono quello slug
+- `?itemId=...`: svuota una singola voce (senza purge Cloudflare)
 
 ```typescript
 await $fetch('/api/storyblok/clearCache')
@@ -353,7 +357,7 @@ await $fetch('/api/storyblok/clearCache')
 
 ### POST `/api/storyblok/clearCache`
 
-Endpoint POST per svuotare cache.
+Pensato per il webhook di Storyblok. Body vuoto: svuota tutto. Body `{ "full_slug": "..." }`: svuota solo le voci di quello slug. In entrambi i casi lancia un purge completo di Cloudflare.
 
 ### GET `/api/sitemap`
 
@@ -441,19 +445,306 @@ const retry = async () => {
 
 Il modulo implementa un sistema di cache lato server configurabile:
 
-- **Cache Duration:** Configurabile tramite `cache.expire` (in ore)
-- **Cache Group:** Tutti gli endpoint usano il gruppo `'storyblok'` per gestione centralizzata
-- **Cache Bypass:** Passa `isEditor` come query parameter per forzare il bypass della cache (utile per l'editor)
+- **Cache Duration:** configurabile tramite `cache.expire`, **in secondi** (è il `maxAge` di `defineCachedEventHandler`). Il default è `1`, cioè praticamente nessuna cache: in produzione impostalo esplicitamente, ad esempio `31536000` (1 anno) e affidati a `clearCache` per l'invalidazione.
+- **Cache Group:** tutti gli endpoint usano il gruppo `'storyblok'`, quindi le voci finiscono nello storage `cache` di Nitro con chiavi `storyblok:_:*`.
+- **Cache Bypass:** passa `isEditor=true` come query parameter per forzare il bypass della cache (utile per l'editor).
 
 ```typescript
-// Forza bypass del cache
+// Forza bypass della cache
 const story = await $fetch('/api/storyblok/request', {
   query: {
     fullSlug: 'home',
-    isEdito: true, // Bypassa cache
+    isEditor: true, // Bypassa cache
   },
 })
 ```
+
+```typescript
+// nuxt.config.ts
+gothamstoryblok: {
+  cache: {
+    expire: process.env.DEFAULT_EXPIRE ? parseInt(process.env.DEFAULT_EXPIRE) : 0,
+  },
+}
+```
+
+## Deploy su Cloudflare Pages: configurazione della cache
+
+Questa sezione descrive come configurare un progetto che usa il modulo e gira su **Cloudflare Pages** in modo da ridurre al minimo le chiamate a Storyblok (API e traffico asset).
+
+### I livelli di cache
+
+Una richiesta si ferma al primo livello che ha una risposta valida:
+
+```
+Browser
+  │
+  ▼
+[1] Cloudflare edge         cache del data center più vicino (Cache Rules)
+  │ MISS
+  ▼
+[2] Tiered Cache            data center "upper tier", condiviso tra più edge
+  │ MISS
+  ▼
+[3] Cache Reserve           storage persistente (opzionale, a pagamento)
+  │ MISS
+  ▼
+[4] Worker Pages (Nitro)    cache Nitro → in memoria oppure su KV
+  │ MISS
+  ▼
+[5] API Storyblok
+```
+
+Cose da sapere:
+
+- **Ogni data center ha la sua cache.** Una pagina in HIT a Milano può essere in MISS a Zurigo. Lo vedi dal suffisso dell'header `cf-ray` (`-MXP`, `-ZRH`, …).
+- **L'Edge TTL è un massimo, non una garanzia.** Sui piani Free e Pro i contenuti poco richiesti vengono scartati prima della scadenza (anche dopo pochi minuti). Per questo un MISS dopo mezz'ora è normale su siti con poco traffico.
+- **Un MISS su Cloudflare non è per forza una chiamata a Storyblok:** la richiesta arriva al Worker, che prima guarda la cache Nitro. È per questo che la cache Nitro deve essere persistente (KV, vedi sotto): senza KV ogni istanza del Worker parte con la cache vuota.
+
+### 1. Cache Nitro persistente con Workers KV
+
+Su Cloudflare Pages il filesystem non è disponibile, quindi senza configurazione la cache Nitro resta **in memoria per singola istanza** del Worker e si perde ogni volta che l'istanza viene spenta. Con un namespace KV la cache diventa persistente e condivisa da tutte le istanze, in tutti i data center: ogni risposta di Storyblok viene richiesta una volta sola fino al successivo `clearCache`.
+
+**Su Cloudflare**
+
+1. **Storage & Databases → Workers KV → Create**: crea un namespace, ad esempio `<progetto>-nitro-cache`.
+2. **Workers & Pages → progetto → Settings → Bindings → Add → KV namespace**, ambiente **Production**:
+   - Variable name: `NITRO_CACHE`
+   - KV namespace: `<progetto>-nitro-cache`
+
+   ⚠️ Va aggiunto come **binding**, non come variabile d'ambiente in *Settings → Variables*. Una variabile di testo chiamata `NITRO_CACHE` non funziona: Nitro non scrive nulla e il namespace resta vuoto.
+3. **Settings → Variables**:
+   - Production: `ENVIROMENT=production`, `DEFAULT_EXPIRE=31536000`
+   - Preview: `DEFAULT_EXPIRE=0` (contenuti sempre freschi, nessun binding KV)
+4. Fai un **nuovo deploy**: binding e variabili valgono solo dal deploy successivo.
+
+Se vuoi la cache anche in Preview, crea un secondo namespace (es. `<progetto>-nitro-cache-preview`) e collegalo con lo stesso nome `NITRO_CACHE` all'ambiente Preview, così le anteprime non toccano la cache di produzione.
+
+**Nel progetto (`nuxt.config.ts`)**
+
+KV va attivato solo dove il binding esiste: se Nitro cerca `NITRO_CACHE` e non lo trova, il driver va in errore. La condizione viene valutata durante `nuxt build`, quindi `ENVIROMENT` deve essere disponibile come variabile di build.
+
+```typescript
+const isCloudflare = Boolean(process.env.CF_PAGES)
+  || (process.env.NITRO_PRESET || '').includes('cloudflare')
+const useKvCache = isCloudflare && process.env.ENVIROMENT === 'production'
+const nitroCacheDir = process.env.NITRO_FS_CACHE_DIR || './.cache/nitro'
+
+export default defineNuxtConfig({
+  nitro: {
+    ...(useKvCache
+      ? { storage: { cache: { driver: 'cloudflare-kv-binding', binding: 'NITRO_CACHE' } } }
+      : isCloudflare
+        ? {}
+        : { storage: { cache: { driver: 'fsLite', base: nitroCacheDir } } }),
+  },
+})
+```
+
+| Ambiente | Storage cache Nitro | Effetto |
+|---|---|---|
+| Produzione su Pages | KV | cache persistente e condivisa |
+| Preview su Pages | memoria, con `DEFAULT_EXPIRE=0` | nessuna cache, contenuti sempre freschi |
+| Locale | disco (`.cache/nitro`) | cache tra un riavvio e l'altro |
+
+Non servono `wrangler.toml` né dipendenze aggiuntive: il driver `cloudflare-kv-binding` è incluso in Nitro.
+
+**Verifica:** dopo il deploy apri qualche pagina, poi in *Workers KV → namespace → KV Pairs* devono comparire chiavi come `storyblok:_:apistoryblokrequ.<hash>.json`.
+
+**Limiti da conoscere**
+
+- Piano Workers Free: circa 100.000 letture, 1.000 scritture, 1.000 cancellazioni e 1.000 list al giorno. Ogni voce svuotata da `clearCache` è una cancellazione: con molte voci o molti svuotamenti al giorno serve Workers Paid (circa 5 $/mese).
+- KV è *eventualmente consistente*: dopo una scrittura o una cancellazione gli altri data center possono vedere il valore vecchio per circa 60 secondi.
+
+### 2. Cache Rules
+
+*Domini → zona → Caching → Cache Rules.* Sostituisci un'eventuale regola generica "Cache everything" con queste quattro, **in quest'ordine** (a parità di match vince l'ultima regola, quindi il bypass deve stare in fondo).
+
+**Regola 1 – HTML pages**
+- Expression: `(not starts_with(http.request.uri.path, "/api/") and not starts_with(http.request.uri.path, "/storyblokasset/") and not starts_with(http.request.uri.path, "/_nuxt/"))`
+- Cache eligibility: **Eligible for cache**
+- Edge TTL: **Ignore cache-control header and use this TTL** → 30 days, con status code TTL: `400–499` → 1 minute, `500–599` → No store
+- Browser TTL: **Override origin** → 1 minute
+- Cache key → Query string: **Ignore query string** (così `utm_*`, `gclid`, `fbclid`… non generano un nuovo render per ogni valore)
+
+**Regola 2 – Storyblok API**
+- Expression: `(starts_with(http.request.uri.path, "/api/storyblok/"))`
+- Eligible for cache, Edge TTL 30 days con gli stessi status code TTL della regola 1
+- Browser TTL: Override origin → 1 minute
+- Cache key: query string **inclusa** (default), perché i parametri distinguono le richieste
+
+**Regola 3 – Storyblok images**
+- Expression: `(starts_with(http.request.uri.path, "/storyblokasset/"))`
+- Eligible for cache, Edge TTL 1 year, Browser TTL 1 year
+
+**Regola 4 – Bypass editor and admin** (sempre ultima)
+- Expression: `(http.request.uri.query contains "_storyblok") or (http.request.uri.query contains "isEditor=true") or starts_with(http.request.uri.path, "/api/storyblok/clearCache") or starts_with(http.request.uri.path, "/api/storyblok/cache") or starts_with(http.request.uri.path, "/api/form")`
+- Cache eligibility: **Bypass cache**
+
+Adatta i percorsi della regola 4 agli endpoint del progetto che non devono mai essere messi in cache (form, webhook, API private).
+
+La regola 3 presuppone che le immagini passino dal proxy Nitro, ad esempio con `@nuxt/image`:
+
+```typescript
+// nuxt.config.ts
+image: {
+  provider: 'storyblok',
+  storyblok: { baseURL: '/storyblokasset/' },
+},
+nitro: {
+  routeRules: {
+    '/storyblokasset/**': { proxy: 'https://a.storyblok.com/**' },
+  },
+},
+```
+
+<details>
+<summary>Le stesse regole in JSON (API Rulesets, fase <code>http_request_cache_settings</code>)</summary>
+
+```json
+{
+  "rules": [
+    {
+      "description": "HTML pages",
+      "expression": "(not starts_with(http.request.uri.path, \"/api/\") and not starts_with(http.request.uri.path, \"/storyblokasset/\") and not starts_with(http.request.uri.path, \"/_nuxt/\"))",
+      "action": "set_cache_settings",
+      "action_parameters": {
+        "cache": true,
+        "edge_ttl": {
+          "mode": "override_origin",
+          "default": 2592000,
+          "status_code_ttl": [
+            { "status_code_range": { "from": 400, "to": 499 }, "value": 60 },
+            { "status_code_range": { "from": 500, "to": 599 }, "value": -1 }
+          ]
+        },
+        "browser_ttl": { "mode": "override_origin", "default": 60 },
+        "cache_key": { "custom_key": { "query_string": { "exclude": { "all": true } } } }
+      },
+      "enabled": true
+    },
+    {
+      "description": "Storyblok API",
+      "expression": "(starts_with(http.request.uri.path, \"/api/storyblok/\"))",
+      "action": "set_cache_settings",
+      "action_parameters": {
+        "cache": true,
+        "edge_ttl": {
+          "mode": "override_origin",
+          "default": 2592000,
+          "status_code_ttl": [
+            { "status_code_range": { "from": 400, "to": 499 }, "value": 60 },
+            { "status_code_range": { "from": 500, "to": 599 }, "value": -1 }
+          ]
+        },
+        "browser_ttl": { "mode": "override_origin", "default": 60 }
+      },
+      "enabled": true
+    },
+    {
+      "description": "Storyblok images",
+      "expression": "(starts_with(http.request.uri.path, \"/storyblokasset/\"))",
+      "action": "set_cache_settings",
+      "action_parameters": {
+        "cache": true,
+        "edge_ttl": { "mode": "override_origin", "default": 31536000 },
+        "browser_ttl": { "mode": "override_origin", "default": 31536000 }
+      },
+      "enabled": true
+    },
+    {
+      "description": "Bypass editor and admin",
+      "expression": "(http.request.uri.query contains \"_storyblok\") or (http.request.uri.query contains \"isEditor=true\") or starts_with(http.request.uri.path, \"/api/storyblok/clearCache\") or starts_with(http.request.uri.path, \"/api/storyblok/cache\") or starts_with(http.request.uri.path, \"/api/form\")",
+      "action": "set_cache_settings",
+      "action_parameters": { "cache": false },
+      "enabled": true
+    }
+  ]
+}
+```
+
+Si applicano con `PUT /zones/{zone_id}/rulesets/phases/http_request_cache_settings/entrypoint` e un token con permesso **Zone → Cache Rules → Edit**. Il `PUT` sostituisce tutte le regole esistenti: salva prima quelle attuali con un `GET` sullo stesso endpoint.
+
+</details>
+
+> **Browser TTL e API:** Cloudflare non abbassa un `cache-control` dell'origin più lungo del Browser TTL della regola. Gli endpoint del modulo rispondono con `max-age` pari a `cache.expire`, quindi con `DEFAULT_EXPIRE=31536000` il browser tiene le risposte delle API per un anno, a prescindere dalla regola 2.
+
+### 3. Tiered Cache e Cache Reserve
+
+- **Tiered Cache** (*Caching → Tiered Cache*): attiva **Smart Tiered Cache**, è gratuita. In caso di MISS il data center chiede prima a un data center "superiore" invece di andare direttamente al Worker.
+- **Cache Reserve** (*Caching → Cache Reserve*): storage persistente a pagamento. Conserva solo risposte con TTL di almeno 10 ore e header `Content-Length`. Le pagine HTML renderizzate da Nuxt vengono inviate a chunk, senza `Content-Length`, quindi **non entrano** in Cache Reserve; le risposte di `/api/storyblok/*` e le immagini sì. Con la cache Nitro su KV il beneficio è limitato: valuta se tenerlo attivo.
+
+### 4. Token API per il purge
+
+Il modulo usa `cloudflare.zoneID` e `cloudflare.apiKey` per il purge della cache in `clearCache`. Crea un token dedicato (*My Profile → API Tokens → Create Token → Custom token*) con:
+
+- Permesso: **Zone → Cache Purge → Purge**
+- Zone resources: solo la zona del sito
+
+```typescript
+// nuxt.config.ts
+gothamstoryblok: {
+  cloudflare: {
+    zoneID: process.env.CLOUDFLARE_ZONE_ID,
+    apiKey: process.env.CLOUDFLARE_API_KEY,
+  },
+}
+```
+
+Queste variabili vanno impostate anche nelle *Variables* del progetto Pages.
+
+### 5. Webhook Storyblok
+
+In Storyblok, *Settings → Webhooks*, crea un webhook sull'evento **Story published** (ed eventualmente *unpublished* / *deleted*) verso:
+
+```
+POST https://<dominio>/api/storyblok/clearCache
+```
+
+Storyblok invia `full_slug` nel body, quindi da KV vengono cancellate solo le voci di quella storia; la cache Cloudflare viene invece svuotata per intero.
+
+### 6. Dopo ogni deploy: purge
+
+Con l'Edge TTL di 30 giorni sull'HTML, dopo un deploy la cache edge continua a servire le pagine generate dalla versione precedente. **Dopo ogni deploy di produzione** svuota la cache: *Caching → Configuration → Purge Everything*, oppure chiama `GET /api/storyblok/clearCache` (svuota anche KV).
+
+### Svuotamento della cache
+
+| Chiamata | Cache Nitro / KV | Cache Cloudflare |
+|---|---|---|
+| `GET /api/storyblok/clearCache` | tutte le voci `storyblok:_:*` e i link | purge completo |
+| `GET /api/storyblok/clearCache?fullSlug=...` | solo le voci che contengono lo slug | purge completo |
+| `GET /api/storyblok/clearCache?itemId=...` | una singola voce | nessun purge |
+| `POST /api/storyblok/clearCache` (body vuoto) | tutte le voci e i link | purge completo |
+| `POST /api/storyblok/clearCache` (`{ "full_slug": "..." }`) | solo le voci di quello slug, e i link | purge completo |
+
+Da tenere presente:
+
+- **Ritardo di KV:** per circa 60 secondi dopo lo svuotamento alcuni data center possono leggere ancora il dato vecchio, e una pagina generata in quel momento torna nella cache edge con il contenuto vecchio. Se dopo una pubblicazione vedi ancora la versione precedente, attendi un minuto e richiama `clearCache`.
+- **Elenco dei link in memoria:** `clearLinks` azzera l'elenco solo nell'istanza del Worker che riceve la chiamata. Le altre istanze lo tengono finché non si riavviano, quindi una pagina **appena creata** può rispondere 422 per qualche minuto su alcune istanze.
+- **La sitemap** (`/api/sitemap`) ha una cache propria di 100 minuti e non viene svuotata da `clearCache`.
+- **L'endpoint è pubblico:** chiunque conosca l'URL può svuotare KV e Cloudflare. Il bypass della regola 4 fa sì che la chiamata arrivi sempre al Worker.
+
+### Verifica
+
+```bash
+# due richieste di fila: la seconda deve essere HIT
+curl -sI https://<dominio>/ | grep -iE 'cf-cache-status|cf-ray|age|cache-control'
+curl -sI https://<dominio>/ | grep -iE 'cf-cache-status|cf-ray|age|cache-control'
+
+# query string ignorata sull'HTML: deve essere HIT già alla prima richiesta
+curl -sI "https://<dominio>/?utm_source=test$RANDOM" | grep -i cf-cache-status
+
+# editor e clearCache non devono mai essere in cache: DYNAMIC
+curl -sI "https://<dominio>/?_storyblok=1" | grep -i cf-cache-status
+```
+
+| `cf-cache-status` | Significato |
+|---|---|
+| `HIT` | servito dalla cache Cloudflare |
+| `MISS` / `EXPIRED` | richiesto al Worker (che può comunque rispondere dalla cache Nitro) |
+| `DYNAMIC` / `BYPASS` | non messo in cache per regola |
+
+Sul piano Free la pagina *Caching → Overview* non mostra statistiche (Cache Analytics è disponibile solo dai piani a pagamento): richieste totali e richieste servite dalla cache si vedono in *Analytics & Logs → Traffic*.
 
 ## Gestione degli Errori
 
@@ -529,10 +820,22 @@ gothamstoryblok/
 - Verifica che gothamutils sia configurato con `multiLang: true`
 - Controlla la lingua corrente con `useLanguage()`
 
-### Cache non aggiornato
+### Cache non aggiornata
 
-- Usa il query parameter `isEditor` per byppassare la cache
+- Usa il query parameter `isEditor` per bypassare la cache
 - O accedi a `/api/storyblok/clearCache` per svuotare manualmente
+- Su Cloudflare, dopo un deploy, fai un purge (vedi [Dopo ogni deploy: purge](#6-dopo-ogni-deploy-purge))
+
+### Il namespace KV resta vuoto
+
+- Controlla che `NITRO_CACHE` sia in *Settings → Bindings* come **KV namespace**, non in *Settings → Variables*
+- Controlla che `ENVIROMENT=production` sia impostata in Production: senza, `useKvCache` è falso al momento della build
+- Fai un nuovo deploy dopo aver aggiunto il binding
+- Verifica che le richieste arrivino davvero al Worker: se la cache edge risponde HIT, il Worker non viene eseguito e KV non viene scritto
+
+### Le pagine tornano in MISS dopo un po'
+
+È il comportamento normale della cache edge sui piani Free/Pro (vedi [I livelli di cache](#i-livelli-di-cache)). Controlla il suffisso di `cf-ray`: richieste successive possono arrivare a data center diversi. Con la cache Nitro su KV questi MISS non generano chiamate a Storyblok.
 
 ## License
 
