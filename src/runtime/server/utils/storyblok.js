@@ -111,46 +111,50 @@ const links = async (query) => {
   }
 }
 
+/**
+ * Indice dei link condiviso tra le richieste dello stesso isolate: si condivide solo il risultato già pronto,
+ * mai la promise del caricamento in corso. Sui Cloudflare Workers, quando la richiesta che ha avviato un
+ * caricamento termina (client che chiude, timeout) le sue continuazioni vengono scartate: una promise condivisa
+ * non si risolverebbe più e ogni richiesta successiva dell'isolate resterebbe appesa in attesa.
+ * Se più richieste trovano l'indice vuoto, ognuna lo carica per conto suo (la risposta di /api/storyblok/links è in cache).
+ */
 let linksList = undefined
-let linksListPromise = null
+// incrementata da clearLinks: un caricamento partito prima dello svuotamento non deve ripristinare l'indice vecchio
+let linksListVersion = 0
 
 const normalizeFullSlug = (value = '') => {
   const normalized = String(value).trim().replace(/^\/+|\/+$/g, '')
   return normalized
 }
 
-const loadLinksList = async () => {
-  if (linksList) return linksList
-  // Se un'altra richiesta la sta già caricando, aspetta quella
-  if (!linksListPromise) {
-    linksListPromise = (async () => {
-      const result = {
-        fullSlug: {},
-        uuid: {},
-        id: {},
-      }
-
-      const links = await $fetch('/api/storyblok/links', { query: { per_page: 1000 } })
-
-      for (const i in links) {
-        const link = links[i]
-        // indicizza sia slug (usato da cdn/stories) che real_path (può differire se impostato su Storyblok)
-        for (const value of [link?.slug, link?.real_path]) {
-          const fullSlug = normalizeFullSlug(value)
-          if (fullSlug && !result.fullSlug[fullSlug]) result.fullSlug[fullSlug] = link
-        }
-        if (!result.uuid[link.uuid]) result.uuid[link.uuid] = link
-        if (!result.id[link.id]) result.id[link.id] = link
-      }
-
-      linksList = result
-      return result
-    })().finally(() => {
-      linksListPromise = null // reset per richieste future
-    })
+const buildLinksIndex = (links) => {
+  const result = {
+    fullSlug: {},
+    uuid: {},
+    id: {},
   }
 
-  return linksListPromise
+  for (const i in links) {
+    const link = links[i]
+    // indicizza sia slug (usato da cdn/stories) che real_path (può differire se impostato su Storyblok)
+    for (const value of [link?.slug, link?.real_path]) {
+      const fullSlug = normalizeFullSlug(value)
+      if (fullSlug && !result.fullSlug[fullSlug]) result.fullSlug[fullSlug] = link
+    }
+    if (!result.uuid[link.uuid]) result.uuid[link.uuid] = link
+    if (!result.id[link.id]) result.id[link.id] = link
+  }
+
+  return result
+}
+
+const loadLinksList = async () => {
+  if (linksList) return linksList
+  const version = linksListVersion
+  const links = await $fetch('/api/storyblok/links', { query: { per_page: 1000 } })
+  const result = buildLinksIndex(links)
+  if (version === linksListVersion) linksList = result
+  return result
 }
 
 const checkFullSlug = async (fullSlug) => {
@@ -169,7 +173,7 @@ const checkFullSlug = async (fullSlug) => {
 
 const clearLinks = async () => {
   linksList = undefined
-  linksListPromise = null
+  linksListVersion++
 
   const cacheLinks = useStorage('cache:storyblok:links')
   const cachedKeys = await cacheLinks.getKeys()
